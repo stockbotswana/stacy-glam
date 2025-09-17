@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart - G.L.A.M. Grace & Glow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #fff0f7;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #e5007e;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0;
+    }
+    .cart-container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .cart-item {
+      display: grid;
+      grid-template-columns: 80px 1fr auto auto;
+      align-items: center;
+      gap: 20px;
+      border-bottom: 1px solid #eee;
+      padding: 15px 0;
+    }
+    .cart-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .cart-details h3 {
+      margin: 0 0 5px;
+    }
+    .cart-price {
+      color: #e5007e;
+      font-weight: 600;
+    }
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .quantity-controls button {
+      padding: 5px 10px;
+      border: none;
+      background: #e5007e;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .remove-btn {
+      border: none;
+      background: #ff4d4d;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .cart-summary {
+      text-align: right;
+      margin-top: 30px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .btn {
+      display: inline-block;
+      background: #e5007e;
+      color: white;
+      text-decoration: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      margin-top: 20px;
+    }
+    .empty {
+      text-align: center;
+      padding: 50px 0;
+    }
+    /* Checkout form */
+    .checkout-form {
+      margin-top: 40px;
+      border-top: 2px solid #eee;
+      padding-top: 30px;
+    }
+    .checkout-form h2 {
+      color: #e5007e;
+      margin-bottom: 20px;
+    }
+    .checkout-form label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    .checkout-form input, .checkout-form textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    .checkout-form textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .success-message {
+      text-align: center;
+      color: #28a745;
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Your Shopping Cart</h1>
+
+</header>
+
+<div class="cart-container" id="cart-container"></div>
+<script>
+  const container = document.getElementById('cart-container');
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+  function saveCart() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+  }
+
+  function updateCartCount() {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const badge = document.getElementById('cart-count');
+    if (badge) {
+      badge.textContent = count;
+
+      // Bounce animation
+      badge.classList.add('bounce');
+      setTimeout(() => badge.classList.remove('bounce'), 500);
+    }
+  }
+
+  function updateCartUI() {
+    container.innerHTML = '';
+
+    if (cart.length === 0) {
+      container.innerHTML = '<div class="empty"><h2>Your cart is empty.</h2><a href="index.html" class="btn">Continue Shopping</a></div>';
+      return;
+    }
+
+    let total = 0;
+
+    cart.forEach((item, index) => {
+      total += item.price * item.quantity;
+
+      const div = document.createElement('div');
+      div.classList.add('cart-item');
+      div.innerHTML = `
+      <img src="${item.img}" alt="${item.title}">
+      <div class="cart-details">
+        <h3>${item.title}</h3>
+        <p class="cart-price">P${item.price.toFixed(2)}</p>
+      </div>
+      <div class="quantity-controls">
+        <button onclick="changeQty(${index}, -1)">-</button>
+        <span>${item.quantity}</span>
+        <button onclick="changeQty(${index}, 1)">+</button>
+      </div>
+      <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+    `;
+      container.appendChild(div);
+    });
+
+    const summary = document.createElement('div');
+    summary.classList.add('cart-summary');
+    summary.innerHTML = `Total: P${total.toFixed(2)}`;
+    container.appendChild(summary);
+
+    // Checkout Form
+    const form = document.createElement('form');
+    form.classList.add('checkout-form');
+    form.innerHTML = `
+    <h2>Checkout</h2>
+    <label for="name">Full Name</label>
+    <input type="text" id="name" required>
+    <label for="phone">Phone Number</label>
+    <input type="tel" id="phone" required>
+    <label for="address">Delivery Address</label>
+    <textarea id="address" required></textarea>
+    <button type="submit" class="btn">Submit Order</button>
+    <div id="loading-spinner" style="display:none; margin-top:15px; text-align:center;">
+      <img src="https://i.imgur.com/LLF5iyg.gif" alt="Loading..." width="50">
+    </div>
+  `;
+    form.addEventListener('submit', submitOrder);
+    container.appendChild(form);
+  }
+
+  // Quantity control
+  function changeQty(index, amount) {
+    cart[index].quantity += amount;
+    if (cart[index].quantity <= 0) {
+      cart.splice(index, 1);
+    }
+    saveCart();
+    updateCartUI();
+  }
+
+  // Remove item
+  function removeItem(index) {
+    cart.splice(index, 1);
+    saveCart();
+    updateCartUI();
+  }
+
+  // Submit order
+  function submitOrder(e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const spinner = document.getElementById('loading-spinner');
+
+    if (!name || !phone || !address) {
+      alert('Please fill in all fields.');
+      return;
+    }
+
+    if (cart.length === 0) {
+      alert('Your cart is empty.');
+      return;
+    }
+
+    // Show spinner
+    spinner.style.display = 'block';
+
+    // Build WhatsApp message with images
+    const ownerNumber = '26775480013'; // Change to store's WhatsApp
+    const cartLines = cart.map(item =>
+      `${item.title} (x${item.quantity}) - P${(item.price*item.quantity).toFixed(2)}%0A${item.img}`
+    ).join('%0A');
+
+    const total = cart.reduce((sum, item) => sum + (item.price*item.quantity), 0);
+
+    const message =
+      `Hello, my name is ${name}.%0A` +
+      `Phone: ${phone}%0A` +
+      `Address: ${address}%0A%0A` +
+      `🛍 My Order:%0A${cartLines}%0A%0ATotal: P${total.toFixed(2)}`;
+
+    // Open WhatsApp in new tab
+    setTimeout(() => {
+      window.open(`https://wa.me/${ownerNumber}?text=${message}`, '_blank');
+
+      // Clear cart
+      cart = [];
+      saveCart();
+
+      container.innerHTML = '<div class="success-message">🎉 Thank you for your order! WhatsApp will open shortly to confirm.</div>';
+    }, 1000); // simulate loading
+  }
+
+  // Initialize
+  updateCartUI();
+  updateCartCount();
+</script>
+
+</body>
+</html>
