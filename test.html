@@ -946,5 +946,18 @@
     });
   });
 </script>
+
+<script>
+  // HASH-BASED ACCESS CONTROL
+  const allowedHash = "abc123"; // must match index.html redirect
+  const hash = window.location.hash.slice(1); // get hash part after #
+
+  if (hash !== allowedHash) {
+    // redirect back to main page if hash is wrong
+    window.location.href = "index.html";
+  }
+</script>
+
+<script src="js/app.js"></script>
 </body>
 </html>
