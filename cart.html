@@ -250,30 +250,60 @@
     // Show spinner
     spinner.style.display = 'block';
 
+    // // Build WhatsApp message with images
+    // const ownerNumber = '26775480013'; // Change to store's WhatsApp
+    // const cartLines = cart.map(item =>
+    //   `${item.title} (x${item.quantity}) - P${(item.price*item.quantity).toFixed(2)}%0A${item.img}`
+    // ).join('%0A');
+    //
+    // const total = cart.reduce((sum, item) => sum + (item.price*item.quantity), 0);
+    //
+    // const message =
+    //   `Hello, my name is ${name}.%0A` +
+    //   `Phone: ${phone}%0A` +
+    //   `Address: ${address}%0A%0A` +
+    //   `🛍 My Order:%0A${cartLines}%0A%0ATotal: P${total.toFixed(2)}`;
+    //
+    // // Open WhatsApp in new tab
+    // setTimeout(() => {
+    //   window.open(`https://wa.me/${ownerNumber}?text=${message}`, '_blank');
+    //
+    //   // Clear cart
+    //   cart = [];
+    //   saveCart();
+    //
+    //   container.innerHTML = '<div class="success-message">🎉 Thank you for your order! WhatsApp will open shortly to confirm.</div>';
+    // }, 1000); // simulate loading
+
     // Build WhatsApp message with images
     const ownerNumber = '26775480013'; // Change to store's WhatsApp
+
     const cartLines = cart.map(item =>
-      `${item.title} (x${item.quantity}) - P${(item.price*item.quantity).toFixed(2)}%0A${item.img}`
-    ).join('%0A');
+      `${item.title} (x${item.quantity}) - P${(item.price * item.quantity).toFixed(2)}\n${item.img}`
+    ).join('\n');
 
-    const total = cart.reduce((sum, item) => sum + (item.price*item.quantity), 0);
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    const message =
-      `Hello, my name is ${name}.%0A` +
-      `Phone: ${phone}%0A` +
-      `Address: ${address}%0A%0A` +
-      `🛍 My Order:%0A${cartLines}%0A%0ATotal: P${total.toFixed(2)}`;
+    let rawMessage =
+      `Hello, my name is ${name}.\n` +
+      `Phone: ${phone}\n` +
+      `Address: ${address}\n\n` +
+      `🛍 My Order:\n${cartLines}\n\nTotal: P${total.toFixed(2)}`;
 
-    // Open WhatsApp in new tab
+// Encode the full message safely for URLs
+    const encodedMessage = encodeURIComponent(rawMessage);
+
+// Open WhatsApp in new tab (works on both web and mobile)
     setTimeout(() => {
-      window.open(`https://wa.me/${ownerNumber}?text=${message}`, '_blank');
+      window.open(`https://wa.me/${ownerNumber}?text=${encodedMessage}`, '_blank');
 
       // Clear cart
       cart = [];
       saveCart();
 
       container.innerHTML = '<div class="success-message">🎉 Thank you for your order! WhatsApp will open shortly to confirm.</div>';
-    }, 1000); // simulate loading
+    }, 1000);
+
   }
 
   // Initialize
